@@ -28,7 +28,7 @@ ohio_url <- "https://en.wikipedia.org/wiki/List_of_tallest_buildings_in_Ohio"
 
 
 # this function scrapes each url to find the ranking table. Some pages have additional tables.
-buildings_url <- function(url_in){
+buildings_wiki <- function(url_in){
   
   # read url
   url <- read_html(url_in)
@@ -43,23 +43,27 @@ buildings_url <- function(url_in){
     item_names <- colnames(item)
     if("Rank" %in% colnames(item)){
       look_here <- as.tibble(item)
+      colnames(look_here) <- str_remove_all(colnames(look_here),"\\[.+")
       return(look_here)
     }
   }
- }
+}
 
 # call function for each url. Note - you could combine and clean at this step,
 # but if you needed to change either the scrape function (building_url) or the
 # clean function (initial_data_cleaner) below, I believe having both in the same
 # function would make it more difficult to update either function.
 
-nyc_df <- buildings_url(nyc_url)
-la_df <- buildings_url(la_url)
-chicago_df <- buildings_url(chicago_url)
-houston_df <- buildings_url(houston_url)
-philly_df <- buildings_url(philly_url)
-phoenix_df <- buildings_url(phoenix_url)
-sanantonio_df <- buildings_url(sanantonio_url)
+nyc_df <- buildings_wiki(nyc_url)
+la_df <- buildings_wiki(la_url)
+chicago_df <- buildings_wiki(chicago_url)
+houston_df <- buildings_wiki(houston_url)
+philly_df <- buildings_wiki(philly_url)
+phoenix_df <- buildings_wiki(phoenix_url)
+sanantonio_df <- buildings_wiki(sanantonio_url)
+
+# drop urls as they are no longer needed
+rm(list = grep("url",ls(),value = T))
 
 # Clean data --------------------------------------------------------------
 
@@ -75,7 +79,7 @@ initial_data_cleaner <- function(df_in){
     # trim other coordinates column - drop punctuation and extra text
     mutate(coordinates = coordinates %>% str_remove_all("\\(.+")) %>% 
     mutate(coordinates = coordinates %>% gsub(".*}","",.)) %>% 
-
+    
     # filter out rows with citations and other non-uniform data 
     filter(str_detect(year, '(1|2)\\d{3}')) %>% 
     filter(str_length(name) > 0) %>% 
@@ -98,4 +102,3 @@ initial_data_cleaner <- function(df_in){
 }
 
 nyc_buildings <- initial_data_cleaner(nyc_df)
-
