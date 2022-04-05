@@ -65,6 +65,20 @@ sanantonio_df <- buildings_wiki(sanantonio_url)
 # drop urls as they are no longer needed
 rm(list = grep("url",ls(),value = T))
 
+# get list of dataframes to clean and find common columns
+dfs <- Filter(function(x) is(x, "data.frame"), mget(ls()))
+
+# set check value for for loop below. should be larger than any other value
+df_size_start <- 100
+
+# find smallest data frame to key off common column 
+for(item in dfs){
+  df_size_next <- dim(item)[2]
+  if(df_size_next < df_size_start){
+    final_df <- colnames(item)}
+  df_size_start <- dim(item)[2]
+}
+
 # Clean data --------------------------------------------------------------
 
 # this function is used in initial clean up of the scrape data
